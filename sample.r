@@ -25,3 +25,4 @@ sfs <-
 	walk2(out, ~ st_write(.x$result, .y, layer_options = c("ENCODING=UTF-8"), delete_layer=TRUE))
 
 
+plot(select(sfs[[1]]$result, 1))

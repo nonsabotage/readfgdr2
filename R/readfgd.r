@@ -33,23 +33,20 @@ geonode_to_geometry <- function (geonode_, num_epsg_, path_pos_, converter_) {
 	map( ~ converter_(.x)) %>%
     st_sfc(crs = num_epsg_)
 }
-geo2multipoly <-
-	partial(
-		geonode_to_geometry,
-		path_pos_  = "./gml:Surface/gml:patches/gml:PolygonPatch/gml:exterior/gml:Ring/gml:curveMember/gml:Curve/gml:segments/gml:LineStringSegment/gml:posList",
-		converter_ = pos_to_multipolygon
-	)
-geo2line <-
-	partial(
-		geonode_to_geometry,
-		path_pos_  = "./gml:Curve/gml:segments/gml:LineStringSegment/gml:posList",
-		converter_ = pos_to_linestring
-	)
-geo2point <-
-	partial(
-		geonode_to_geometry,
-		path_pos_  = "./gml:Point/gml:pos",
-		converter_ = pos_to_point
+convert_option <-
+	list(
+		area = list(
+			path_pos_  = "./gml:Surface/gml:patches/gml:PolygonPatch/gml:exterior/gml:Ring/gml:curveMember/gml:Curve/gml:segments/gml:LineStringSegment/gml:posList",
+			converter_ = pos_to_multipolygon
+		),
+		loc = list(
+			path_pos_  = "./gml:Curve/gml:segments/gml:LineStringSegment/gml:posList",
+			converter_ = pos_to_linestring
+		),
+		pos = list(
+			path_pos_  = "./gml:Point/gml:pos",
+			converter_ = pos_to_point
+		)
 	)
 readfgd <- function (fgd_xml_file_, num_epsg_) {
 
@@ -96,17 +93,15 @@ readfgd <- function (fgd_xml_file_, num_epsg_) {
 		set_names(ungeometry_node_name)
 
 	# geometry
-	convert_geonode_to_geometry <-
-		geometry_node_name %>%
-		switch(
-			area = geo2multipoly,
-			loc = geo2line,
-			pos = geo2point,
-			stop(sprintf("%s : 見慣れない形状タイプですね", geometry_node_name))
+	path_geonode <- sprintf("./d1:%s", geometry_node_name)
+	geonode      <- xml_find_first(class_node, path_geonode)
+	geometry     <-
+		geonode_to_geometry(
+			geonode_ = geonode,
+			num_epsg_ = num_epsg_,
+			path_pos_  = purrr::pluck(convert_option, geometry_node_name, "path_pos_"),
+			converter_ = purrr::pluck(convert_option, geometry_node_name, "converter_")
 		)
-	path_geonode  <- sprintf("./d1:%s", geometry_node_name)
-	geometry_node <- xml_find_first(class_node, path_geonode)
-	geometry      <- convert_geonode_to_geometry(geonode_ = geometry_node, num_epsg_ = num_epsg_)
 
 
 	res <- bind_cols(c(gmlid, ungeometry_node_value))
