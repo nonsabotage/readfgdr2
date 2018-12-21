@@ -1,0 +1,8 @@
+*.xml
+*.grd
+*.tif
+*.RData
+*.Rhistory
+FG-GML-563804-ALL-20180101
+out
+docs
