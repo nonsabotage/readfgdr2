@@ -9,7 +9,7 @@ library(rvest)
 library(XML)
 library(tidyverse)
 library(here)
-source("R/readfgr.r", encoding = "UTF-8")
+source("R/readfgd.r", encoding = "UTF-8")
 
 xmls <-
 	"FG-GML-563804-ALL-20180101" %>%
@@ -21,7 +21,7 @@ out <-
 	here("out", .)
 sfs <-
 	xmls %>%
-	map( ~ safely(readfgdr)(.x, 4612)) %>%
+	map( ~ safely(readfgd)(.x, 4612)) %>%
 	walk2(out, ~ st_write(.x$result, .y, layer_options = c("ENCODING=UTF-8"), delete_layer=TRUE))
 
 

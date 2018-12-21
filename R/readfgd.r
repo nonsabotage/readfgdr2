@@ -51,10 +51,10 @@ geo2point <-
 		path_pos_  = "./gml:Point/gml:pos",
 		converter_ = pos_to_point
 	)
-readfgdr <- function (fgdr_xml_file_, num_epsg_) {
+readfgd <- function (fgd_xml_file_, num_epsg_) {
 
-	fgdr_class <-
-		fgdr_xml_file_ %>%
+	fgd_class <-
+		fgd_xml_file_ %>%
 		path_file() %>%
 		str_split("-") %>%
 		flatten_chr() %>%
@@ -62,13 +62,13 @@ readfgdr <- function (fgdr_xml_file_, num_epsg_) {
 
 	# parse xml
 	parsed_xml <-
-		fgdr_xml_file_ %>%
+		fgd_xml_file_ %>%
 		read_xml()
 
 	# node name
 	# 名前空間の解決にxml_ns_strip()を使うことができるが計算コストが高い
 	# 名前空間は直接指定すること
-	path_data_node  <- sprintf("/d1:Dataset/d1:%s[1]/child::*", fgdr_class)
+	path_data_node  <- sprintf("/d1:Dataset/d1:%s[1]/child::*", fgd_class)
 	data_node_names <-
 		parsed_xml %>%
 		xml_find_all(path_data_node) %>%
@@ -78,7 +78,7 @@ readfgdr <- function (fgdr_xml_file_, num_epsg_) {
 	ungeometry_node_name <- data_node_names[-geometry_node_index]
 
 	# glmid
-	path_class <- sprintf("/d1:Dataset/d1:%s", fgdr_class)
+	path_class <- sprintf("/d1:Dataset/d1:%s", fgd_class)
 	class_node <- parsed_xml %>% xml_find_all(path_class)
 	gmlid <-
 		class_node %>%
