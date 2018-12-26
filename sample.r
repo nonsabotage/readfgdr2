@@ -5,11 +5,10 @@
 # ogr2ogr -f "ESRI Shapefile" -lco "ENCODING=UTF-8" a.shp FG-GML-563804-RdCompt-20180101-0001.xml
 
 library(fs)
-library(rvest)
-library(XML)
 library(tidyverse)
 library(here)
-source("R/readfgd.r", encoding = "UTF-8")
+library(tictoc)
+source("R/readfgd_dev.r", encoding = "UTF-8")
 
 xmls <-
 	"FG-GML-563804-ALL-20180101" %>%
@@ -25,4 +24,15 @@ sfs <-
 	walk2(out, ~ st_write(.x$result, .y, layer_options = c("ENCODING=UTF-8"), delete_layer=TRUE))
 
 
-plot(select(sfs[[1]]$result, 1))
+# furrrを使っても早くならない・・・
+# マージするコストが大きいのだろうか？
+source("R/readfgd_dev.r", encoding = "UTF-8")
+bench::mark(
+	dev = readfgd("FG-GML-563804-ALL-20180101/FG-GML-563804-RdCompt-20180101-0001.xml", 4612)
+)
+
+source("R/readfgd.r", encoding = "UTF-8")
+bench::mark(
+	org = readfgd("FG-GML-563804-ALL-20180101/FG-GML-563804-RdCompt-20180101-0001.xml", 4612)
+)
+
