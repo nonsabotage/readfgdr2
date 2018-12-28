@@ -28,11 +28,11 @@ sfs <-
 # マージするコストが大きいのだろうか？
 source("R/readfgd_dev.r", encoding = "UTF-8")
 bench::mark(
-	dev = readfgd("FG-GML-563804-ALL-20180101/FG-GML-563804-RdCompt-20180101-0001.xml", 4612)
+	dev = readfgd("FG-GML-563804-ALL-20180101/FG-GML-563804-BldA-20180101-0001.xml", 4612)
 )
 
 source("R/readfgd.r", encoding = "UTF-8")
 bench::mark(
-	org = readfgd("FG-GML-563804-ALL-20180101/FG-GML-563804-RdCompt-20180101-0001.xml", 4612)
+	org = readfgd("FG-GML-563804-ALL-20180101/FG-GML-563804-BldA-20180101-0001.xml", 4612)
 )
 

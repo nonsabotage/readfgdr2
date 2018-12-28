@@ -60,7 +60,7 @@ readfgd <- function (fgd_xml_file_, num_epsg_) {
 	# parse xml
 	parsed_xml <-
 		fgd_xml_file_ %>%
-		read_xml()
+		read_xml(options = c("NOBLANKS", "HUGE"))
 
 	# node name
 	# 名前空間の解決にxml_ns_strip()を使うことができるが計算コストが高い
