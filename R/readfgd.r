@@ -53,9 +53,7 @@ readfgd <- function (fgd_xml_file_, num_epsg_) {
 	fgd_class <-
 		fgd_xml_file_ %>%
 		path_file() %>%
-		str_split("-") %>%
-		flatten_chr() %>%
-		purrr::pluck(4) # マジックナンバーなので正規表現で書き直したい・・・・
+		str_replace("FG-GML-\\d{6}-([a-zA-Z]+)-\\d{8}-\\d{4}.xml", "\\1")
 
 	# parse xml
 	parsed_xml <-
@@ -97,12 +95,11 @@ readfgd <- function (fgd_xml_file_, num_epsg_) {
 	geonode      <- xml_find_first(class_node, path_geonode)
 	geometry     <-
 		geonode_to_geometry(
-			geonode_ = geonode,
-			num_epsg_ = num_epsg_,
+			geonode_   = geonode,
+			num_epsg_  = num_epsg_,
 			path_pos_  = purrr::pluck(convert_option, geometry_node_name, "path_pos_"),
 			converter_ = purrr::pluck(convert_option, geometry_node_name, "converter_")
 		)
-
 
 	res <- bind_cols(c(gmlid, ungeometry_node_value))
 	st_geometry(res) <- geometry

@@ -29,7 +29,8 @@ pos_to_point <- function (pos_) {
 	st_point()
 }
 geonode_to_geometry <- function (geonode_, num_epsg_, path_pos_, converter_) {
-	plan(multisession)
+	plan(multisession(gc = TRUE))
+	# plan(multiprocess)
 	geonode_ %>%
 		xml_find_first(path_pos_) %>%
 		xml_text() %>%
@@ -51,14 +52,14 @@ convert_option <-
 			converter_ = pos_to_point
 		)
 	)
-readfgd <- function (fgd_xml_file_, num_epsg_) {
+readfgd_dev <- function (fgd_xml_file_, num_epsg_) {
 
 	fgd_class <-
 		fgd_xml_file_ %>%
 		path_file() %>%
 		str_split("-") %>%
 		flatten_chr() %>%
-		purrr::pluck(4) # マジックナンバーなので正規表現で書き直したい・・・・
+		purrr::pluck(4)
 
 	# parse xml
 	parsed_xml <-
@@ -66,8 +67,6 @@ readfgd <- function (fgd_xml_file_, num_epsg_) {
 		read_xml()
 
 	# node name
-	# 名前空間の解決にxml_ns_strip()を使うことができるが計算コストが高い
-	# 名前空間は直接指定すること
 	path_data_node  <- sprintf("/d1:Dataset/d1:%s[1]/child::*", fgd_class)
 	data_node_names <-
 		parsed_xml %>%
@@ -89,8 +88,6 @@ readfgd <- function (fgd_xml_file_, num_epsg_) {
 	path_ungeometry_node  <- sprintf("./d1:%s", ungeometry_node_name)
 	ungeometry_node_value <-
 		path_ungeometry_node %>%
-		# 属性ノードが欠落している場合があるのでxml_find_allを使わない
-		# クラスノードと同じ数が返されるxml_find_firstを使う
 		map( ~ xml_find_first(class_node, .x)) %>%
 		map( ~ xml_text(.x)) %>%
 		set_names(ungeometry_node_name)
@@ -105,7 +102,6 @@ readfgd <- function (fgd_xml_file_, num_epsg_) {
 			path_pos_  = purrr::pluck(convert_option, geometry_node_name, "path_pos_"),
 			converter_ = purrr::pluck(convert_option, geometry_node_name, "converter_")
 		)
-
 
 	res <- bind_cols(c(gmlid, ungeometry_node_value))
 	st_geometry(res) <- geometry
